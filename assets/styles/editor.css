@@ -1,0 +1,90 @@
+.semantic-editor {
+    padding: 100px;
+    font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+    font-size: 1rem;
+    line-height: 2;
+}
+
+.semantic-editor div {
+    padding-left: 30px;
+    white-space: pre-wrap;
+    border-left: 1px solid hsl(0, 0%, 90%);
+}
+
+.semantic-editor [data-type='empty'] {
+    position: relative;
+    border-left: none;
+}
+
+.semantic-editor [data-type='empty']::before {
+    content: '';
+    position: absolute;
+    top: 11px;
+    left: -4px;
+    width: 9px;
+    height: 9px;
+    color: #4271ae;
+    background-image: url(../images/add.svg);
+    background-size: 9px 9px;
+}
+
+.semantic-editor [data-type='heading1'],
+.semantic-editor [data-type='heading2'],
+.semantic-editor [data-type='heading3'],
+.semantic-editor [data-type='heading4'],
+.semantic-editor [data-type='heading5'],
+.semantic-editor [data-type='heading6'] {
+    font-weight: bold;
+}
+
+.semantic-editor [data-type='heading1'] {
+    border-color: hsl(0, 0%, 0%);
+}
+
+.semantic-editor [data-type='heading2'] {
+    border-color: hsl(0, 0%, 15%);
+}
+
+.semantic-editor [data-type='heading3'] {
+    border-color: hsl(0, 0%, 30%);
+}
+
+.semantic-editor [data-type='heading4'] {
+    border-color: hsl(0, 0%, 45%);
+}
+
+.semantic-editor [data-type='heading5'] {
+    border-color: hsl(0, 0%, 60%);
+}
+
+.semantic-editor [data-type='heading6'] {
+    border-color: hsl(0, 0%, 75%);
+}
+
+.semantic-editor [data-type='codeblock'] {
+    background-color: #f2f2f2;
+}
+
+/**
+ * Formats
+ */
+
+.semantic-kirbytag {
+    padding: 0.2em;
+    font-weight: normal;
+    background-color: #e3eaf3;
+}
+
+.semantic-kirbytag span {
+    color: #4271ae;
+}
+
+.semantic-reference {
+    padding: 0.2em;
+    font-weight: bold;
+    background-color: #fffad5;
+}
+
+.semantic-reference span {
+    color: #c82829;
+}
