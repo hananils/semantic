@@ -8,15 +8,15 @@
 .semantic-editor div {
     padding-left: 30px;
     white-space: pre-wrap;
-    border-left: 1px solid hsl(0, 0%, 90%);
+    border-left: 1px solid hsl(0, 0%, 95%);
 }
 
-.semantic-editor [data-type='empty'] {
+.semantic-editor .empty {
     position: relative;
     border-left: none;
 }
 
-.semantic-editor [data-type='empty']::before {
+.semantic-editor .empty::before {
     content: '';
     position: absolute;
     top: 11px;
@@ -28,41 +28,46 @@
     background-size: 9px 9px;
 }
 
-.semantic-editor [data-type='heading1'],
-.semantic-editor [data-type='heading2'],
-.semantic-editor [data-type='heading3'],
-.semantic-editor [data-type='heading4'],
-.semantic-editor [data-type='heading5'],
-.semantic-editor [data-type='heading6'] {
+.semantic-editor .heading {
     font-weight: bold;
 }
 
-.semantic-editor [data-type='heading1'] {
+.semantic-editor .heading[data-hierarchy='1'] {
     border-color: hsl(0, 0%, 0%);
 }
 
-.semantic-editor [data-type='heading2'] {
-    border-color: hsl(0, 0%, 15%);
+.semantic-editor .heading[data-hierarchy='2'] {
+    border-color: hsl(0, 0%, 70%);
 }
 
-.semantic-editor [data-type='heading3'] {
-    border-color: hsl(0, 0%, 30%);
+.semantic-editor .heading[data-hierarchy='3'] {
+    border-color: hsl(0, 0%, 80%);
 }
 
-.semantic-editor [data-type='heading4'] {
-    border-color: hsl(0, 0%, 45%);
+.semantic-editor .heading[data-hierarchy='4'] {
+    border-color: hsl(0, 0%, 85%);
 }
 
-.semantic-editor [data-type='heading5'] {
-    border-color: hsl(0, 0%, 60%);
+.semantic-editor .heading[data-hierarchy='5'] {
+    border-color: hsl(0, 0%, 87.5%);
 }
 
-.semantic-editor [data-type='heading6'] {
-    border-color: hsl(0, 0%, 75%);
+.semantic-editor .heading[data-hierarchy='6'] {
+    border-color: hsl(0, 0%, 90%);
 }
 
-.semantic-editor [data-type='codeblock'] {
+.semantic-editor .blockcode {
     background-color: #f2f2f2;
+}
+
+.semantic-editor .blockquote {
+    color: #4271ae;
+    font-style: italic;
+}
+
+.semantic-editor .unorderedlist {
+    padding-left: calc(30px + 2ch);
+    text-indent: -2ch;
 }
 
 /**
@@ -70,6 +75,7 @@
  */
 
 .semantic-kirbytag {
+    margin: 0 -0.2em;
     padding: 0.2em;
     font-weight: normal;
     background-color: #e3eaf3;
@@ -80,6 +86,7 @@
 }
 
 .semantic-reference {
+    margin: 0 -0.2em;
     padding: 0.2em;
     font-weight: bold;
     background-color: #fffad5;

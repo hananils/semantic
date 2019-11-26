@@ -1,5 +1,11 @@
 import Formatters from './formatters.js';
 
+import './formatters/block.heading.js';
+import './formatters/block.unorderedlist.js';
+import './formatters/block.orderedlist.js';
+import './formatters/block.blockquote.js';
+import './formatters/block.blockcode.js';
+
 import './formatters/inline.strong.js';
 import './formatters/inline.em.js';
 import './formatters/inline.kirbytag.js';
@@ -61,75 +67,36 @@ export default class Semantic {
 
     parse() {
         let blocks = this.editor.textContent.split(/\n/);
-        // let forced = false;
-
-        // let self = this;
-
-        paragraphs.forEach(function(paragraph) {
-            let type = self.getType(paragraph);
-
-            // if (forced === true && type !== 'codeblock') {
-            //     type = 'codeblock';
-            // } else if (forced === false && type === 'codeblock') {
-            //     forced = true;
-            // } else {
-            //     forced = false;
-            // }
-
-            self.blocks.push({
-                type: type,
-                content: paragraph
-            });
-        });
-    }
-
-    getType(block) {
-        if (block === '') {
-            return 'empty';
-        } else if (block.startsWith('#######')) {
-            return 'heading6';
-        } else if (block.startsWith('#####')) {
-            return 'heading5';
-        } else if (block.startsWith('####')) {
-            return 'heading4';
-        } else if (block.startsWith('###')) {
-            return 'heading3';
-        } else if (block.startsWith('##')) {
-            return 'heading2';
-        } else if (block.startsWith('#')) {
-            return 'heading1';
-        } else if (block.startsWith('>')) {
-            return 'blockquote';
-        } else if (block.startsWith('```')) {
-            return 'codeblock';
-        }
-
-        return 'text';
-    }
-
-    write() {
-        const wrapper = document.createElement('div');
-        const br = document.createElement('br');
-        let content;
 
         this.clear();
-        let self = this;
+        blocks.forEach(this.write.bind(this));
 
-        this.blocks.forEach(
-            function(block) {
-                content = wrapper.cloneNode();
+        blocks = this.editor.querySelectorAll('div');
+        blocks.forEach(this.identify.bind(this));
+    }
 
-                if (block.type === 'empty') {
-                    content.appendChild(br.cloneNode());
-                } else {
-                    content.textContent = block.content;
-                    this.formatInlines(content);
-                }
+    write(block) {
+        const wrapper = document.createElement('div');
+        const br = document.createElement('br');
 
-                content.setAttribute('data-type', block.type);
-                self.editor.appendChild(content);
-            }.bind(this)
-        );
+        if (block === '') {
+            wrapper.appendChild(br.cloneNode());
+            wrapper.classList.add('empty');
+        } else {
+            wrapper.textContent = block;
+            wrapper.classList.add('paragraph');
+            this.formatInlines(wrapper);
+        }
+
+        this.editor.appendChild(wrapper);
+    }
+
+    identify(block) {
+        let formatters = Formatters.get('block');
+
+        formatters.some(function(formatter) {
+            return formatter(block.textContent, block);
+        });
     }
 
     clear() {
@@ -158,8 +125,8 @@ export default class Semantic {
             if (target.nodeType === 1 && target.matches('.semantic-editor')) {
                 return;
             } else if (target.nodeType === 3) {
-                if (!target.parentNode.matches('div[data-type]')) {
-                    target = target.parentNode.closest('div[data-type]');
+                if (!target.parentNode.matches('div')) {
+                    target = target.parentNode.closest('div');
                 } else {
                     target = target.parentNode;
                 }
@@ -192,9 +159,10 @@ export default class Semantic {
         if (content.trim() === '' && !block.childNodes.length) {
             let br = document.createElement('br');
 
-            console.log('empty', br);
             // block.innerHTML = '';
-            block.setAttribute('data-type', 'empty');
+            delete block.dataset;
+            block.className = '';
+            block.classList.add('empty');
             block.appendChild(br.cloneNode());
         }
 
