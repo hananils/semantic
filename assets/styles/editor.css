@@ -1,8 +1,56 @@
+/**
+ * hana+nils · Büro für Gestaltung
+ * https://hananils.de · buero@hananils.de
+ */
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 100px;
+    background-color: #efefef;
+}
+
+div {
+    max-width: 1200px;
+}
+
+h1 {
+    padding-bottom: 0.75rem;
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica,
+        Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.field {
+    border: 1px solid #ccc;
+}
+
+.field:focus-within {
+    border-color: #4170ad;
+    outline: 2px solid #c2cede;
+}
+
+/**
+ * Semantic Editor
+ */
+
 .semantic-editor {
     padding: 100px;
     font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
     font-size: 1rem;
     line-height: 2;
+    background-color: #fff;
+}
+
+.semantic-editor:focus {
+    outline: none;
 }
 
 .semantic-editor div {
@@ -11,12 +59,12 @@
     border-left: 1px solid hsl(0, 0%, 95%);
 }
 
-.semantic-editor .empty {
+.semantic-editor [data-type='empty'] {
     position: relative;
     border-left: none;
 }
 
-.semantic-editor .empty::before {
+.semantic-editor [data-type='empty']::before {
     content: '';
     position: absolute;
     top: 11px;
@@ -28,44 +76,44 @@
     background-size: 9px 9px;
 }
 
-.semantic-editor .heading {
+.semantic-editor [data-type='heading'] {
     font-weight: bold;
 }
 
-.semantic-editor .heading[data-hierarchy='1'] {
+.semantic-editor [data-hierarchy='1'] {
     border-color: hsl(0, 0%, 0%);
 }
 
-.semantic-editor .heading[data-hierarchy='2'] {
+.semantic-editor [data-hierarchy='2'] {
     border-color: hsl(0, 0%, 70%);
 }
 
-.semantic-editor .heading[data-hierarchy='3'] {
+.semantic-editor [data-hierarchy='3'] {
     border-color: hsl(0, 0%, 80%);
 }
 
-.semantic-editor .heading[data-hierarchy='4'] {
+.semantic-editor [data-hierarchy='4'] {
     border-color: hsl(0, 0%, 85%);
 }
 
-.semantic-editor .heading[data-hierarchy='5'] {
+.semantic-editor [data-hierarchy='5'] {
     border-color: hsl(0, 0%, 87.5%);
 }
 
-.semantic-editor .heading[data-hierarchy='6'] {
+.semantic-editor [data-hierarchy='6'] {
     border-color: hsl(0, 0%, 90%);
 }
 
-.semantic-editor .blockcode {
+.semantic-editor [data-type='blockcode'] {
     background-color: #f2f2f2;
 }
 
-.semantic-editor .blockquote {
+.semantic-editor [data-type='blockquote'] {
     color: #4271ae;
     font-style: italic;
 }
 
-.semantic-editor .unorderedlist {
+.semantic-editor [data-type='unorderedlist'] {
     padding-left: calc(30px + 2ch);
     text-indent: -2ch;
 }
@@ -94,4 +142,11 @@
 
 .semantic-reference span {
     color: #c82829;
+}
+
+.semantic-editor code {
+    margin: 0 -0.2em;
+    padding: 0.2em;
+    font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+    background-color: #f2f2f2;
 }

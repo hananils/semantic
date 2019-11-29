@@ -6,10 +6,6 @@ import { registerType } from '../formatters.js';
  * https://hananils.de · buero@hananils.de
  */
 
-class UnorderedList extends Block {
-    matches(content) {
-        return /^\s{0,3}-\s/.test(content);
-    }
-}
+class Paragraph extends Block {}
 
-registerType(UnorderedList);
+registerType(Paragraph, 'last');

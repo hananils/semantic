@@ -1,22 +1,25 @@
-import Formatters from '../formatters.js';
+import Block from '../block.js';
+import { registerType } from '../formatters.js';
 
 /**
  * hana+nils · Büro für Gestaltung
  * https://hananils.de · buero@hananils.de
  */
 
-Formatters.register('block', function heading(content, block) {
-    if (content.startsWith('#')) {
-        let hierarchy = content.match(/#+/)[0];
+class Heading extends Block {
+    matches(content) {
+        return /^\s{0,3}#+\s/.test(content);
+    }
 
-        block.className = '';
-        block.classList.add('heading');
+    parse(content, block) {
+        let hierarchy = content.match(/^#+/)[0];
 
-        delete block.dataset;
+        this.clear(block);
+        block.dataset.type = 'heading';
         block.dataset.hierarchy = hierarchy.length;
 
         return true;
     }
+}
 
-    return false;
-});
+registerType(Heading);

@@ -1,11 +1,11 @@
-import Formatters from '../formatters.js';
+import { registerFormat } from '../formatters.js';
 
 /**
  * hana+nils · Büro für Gestaltung
  * https://hananils.de · buero@hananils.de
  */
 
-Formatters.register('inline', function reference(content, block) {
+registerFormat(function reference(content, block) {
     content = content.replace(
         /([#@^])([a-z0-9\/\._-]+)/gi,
         '<a class="semantic-reference"><span>$1</span>$2</a>'

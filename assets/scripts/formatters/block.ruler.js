@@ -6,10 +6,10 @@ import { registerType } from '../formatters.js';
  * https://hananils.de · buero@hananils.de
  */
 
-class UnorderedList extends Block {
+class Ruler extends Block {
     matches(content) {
-        return /^\s{0,3}-\s/.test(content);
+        return /^\s{0,3}[-*=]{3}/.test(content);
     }
 }
 
-registerType(UnorderedList);
+registerType(Ruler);

@@ -1,19 +1,15 @@
-import Formatters from '../formatters.js';
+import Block from '../block.js';
+import { registerType } from '../formatters.js';
 
 /**
  * hana+nils · Büro für Gestaltung
  * https://hananils.de · buero@hananils.de
  */
 
-Formatters.register('block', function blockquote(content, block) {
-    if (content.startsWith('> ')) {
-        delete block.className;
-        delete block.dataset;
-
-        block.classList.add('blockquote');
-
-        return true;
+class Blockquote extends Block {
+    matches(content) {
+        return /^\s{0,3}>\s/.test(content);
     }
+}
 
-    return false;
-});
+registerType(Blockquote);
