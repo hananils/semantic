@@ -58,8 +58,6 @@ export default class Semantic {
             let empty = document.createElement('div');
             let prevs = this.countEmptyNeighbor(target, 'prev');
             let nexts = this.countEmptyNeighbor(target, 'next');
-            let range = document.createRange();
-            let selection = window.getSelection();
 
             this.format(empty, false);
 
@@ -80,9 +78,7 @@ export default class Semantic {
                 target = target.previousElementSibling;
             }
 
-            range.setStart(target, 0);
-            selection.removeAllRanges();
-            selection.addRange(range);
+            this.setRange(target, 0);
         }
     }
 
@@ -148,7 +144,6 @@ export default class Semantic {
 
             this.editor.textContent = begin + pasted + end;
             this.parse();
-            console.log(position, pasted.length);
             this.setCaret(position + pasted.length + offset);
         }
 
@@ -290,19 +285,15 @@ export default class Semantic {
     }
 
     setCaret(position) {
-        let range = document.createRange();
         let count = 0;
         let nodes = [this.editor];
         let node;
-
-        range.setStart(this.editor, 0);
-        range.collapse(true);
 
         /**
          * Set the caret to the given context node if the user hit the enter key.
          */
         if (this.flag !== false && this.node) {
-            range.setStart(this.node, 0);
+            this.setRange(this.node, 0);
         } else {
             /**
              * Parse all text nodes to find the correct caret position.
@@ -313,7 +304,7 @@ export default class Semantic {
                     let next = count + node.length;
 
                     if (count <= position && position <= next) {
-                        range.setStart(node, position - count);
+                        this.setRange(node, position - count);
 
                         break;
                     }
@@ -331,8 +322,15 @@ export default class Semantic {
                 }
             }
         }
+    }
 
+    setRange(node, start) {
+        let range = document.createRange();
         let selection = window.getSelection();
+
+        range.collapse(true);
+        range.setStart(node, start);
+
         selection.removeAllRanges();
         selection.addRange(range);
     }

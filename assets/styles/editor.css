@@ -59,7 +59,7 @@ h1 {
     outline: none;
 }
 
-.semantic-editor div {
+.semantic-editor [data-type] {
     padding-left: 30px;
     white-space: pre-wrap;
     border-left: 1px solid hsl(0, 0%, 95%);
