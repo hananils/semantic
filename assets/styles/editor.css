@@ -73,13 +73,16 @@ h1 {
 .semantic-editor [data-type='empty']::before {
     content: '';
     position: absolute;
-    top: 11px;
-    left: -4px;
-    width: 9px;
-    height: 9px;
+    top: -5px;
+    left: -20px;
+    width: 41px;
+    height: 41px;
     color: #4271ae;
     background-image: url(../images/add.svg);
+    background-repeat: no-repeat;
+    background-position: center;
     background-size: 9px 9px;
+    cursor: pointer;
 }
 
 .semantic-editor [data-type='heading'] {
