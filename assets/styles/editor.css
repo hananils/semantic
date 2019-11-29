@@ -12,12 +12,12 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 100px;
+    padding: 30px;
     background-color: #efefef;
 }
 
 div {
-    max-width: 1200px;
+    max-width: 1000px;
 }
 
 h1 {
@@ -42,11 +42,17 @@ h1 {
  */
 
 .semantic-editor {
-    padding: 100px;
+    padding: 10vw;
     font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
     font-size: 1rem;
     line-height: 2;
     background-color: #fff;
+}
+
+@media (min-width: 1000px) {
+    .semantic-editor {
+        padding: 100px;
+    }
 }
 
 .semantic-editor:focus {
