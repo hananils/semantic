@@ -229,7 +229,7 @@ export default class Semantic {
          * make sure the caret will be positioned inside this node after updating.
          * This concerns multiple consecutive empty lines.
          */
-        if (this.flag !== false && !this.node) {
+        if (this.flag === 'Enter' && !this.node) {
             this.node = container;
         }
 
