@@ -53,10 +53,63 @@ export default class Semantic {
      * Events
      */
 
-    handleClick(event) {
-        if (event.target.dataset.type === 'empty') {
-            console.log('click', event);
+    handleClick({ target, layerX }) {
+        if (target.dataset.type === 'empty' && layerX < 25) {
+            let empty = document.createElement('div');
+            let prevs = this.countEmptyNeighbor(target, 'prev');
+            let nexts = this.countEmptyNeighbor(target, 'next');
+            let range = document.createRange();
+            let selection = window.getSelection();
+
+            this.format(empty, false);
+
+            if (!prevs && nexts < 2) {
+                target.parentNode.insertBefore(empty.cloneNode(true), target);
+            }
+            if (!nexts && prevs < 2) {
+                target.parentNode.insertBefore(
+                    empty.cloneNode(true),
+                    target.nextElementSibling
+                );
+            }
+
+            if (nexts === 2) {
+                target = target.nextElementSibling;
+            }
+            if (prevs === 2) {
+                target = target.previousElementSibling;
+            }
+
+            range.setStart(target, 0);
+            selection.removeAllRanges();
+            selection.addRange(range);
         }
+    }
+
+    countEmptyNeighbor(node, direction = 'prev') {
+        let siblings = [];
+        let sibling;
+
+        if (direction === 'prev') {
+            sibling = 'previousElementSibling';
+        } else {
+            sibling = 'nextElementSibling';
+        }
+
+        let i = 0;
+        while (i < 2 && node[sibling]) {
+            node = node[sibling];
+
+            if (node.dataset.type === 'empty') {
+                siblings.push(node[sibling]);
+            } else {
+                break;
+            }
+
+            i++;
+        }
+
+        return siblings.length;
     }
 
     handleKeyup({ code }) {
