@@ -1,4 +1,5 @@
 import { Formatters } from './formatters.js';
+import { Cursor } from './cursor.js';
 
 import './formatters/block.blockcode.js';
 import './formatters/block.blockquote.js';
@@ -23,12 +24,10 @@ import './formatters/inline.reference.js';
 export default class Semantic {
     constructor(editor) {
         this.editor = editor;
+        this.cursor = new Cursor(this.editor);
         this.formatters = new Formatters();
 
-        /**
-         * Set a flag if the user hits special keys in order to set the correct
-         * range context when restoring the caret position.
-         */
+        this.position = null;
         this.flag = false;
 
         // Parse document
@@ -78,7 +77,7 @@ export default class Semantic {
                 target = target.previousElementSibling;
             }
 
-            this.setRange(target, 0);
+            this.cursor.caret(target);
         }
     }
 
@@ -127,7 +126,7 @@ export default class Semantic {
         if (pasted) {
             let length = pasted.length;
             let block = event.target.closest('div');
-            let position = this.getCaret();
+            let { position } = this.cursor.get();
             let offset = Array.from(block.parentNode.children).indexOf(block);
             let content = '';
 
@@ -144,7 +143,7 @@ export default class Semantic {
 
             this.editor.textContent = begin + pasted + end;
             this.parse();
-            this.setCaret(position + pasted.length + offset);
+            this.set(position + pasted.length + offset);
         }
 
         event.preventDefault();
@@ -165,11 +164,7 @@ export default class Semantic {
         const wrapper = document.createElement('div');
         wrapper.textContent = block;
 
-        /**
-         * Make sure the caret position is not calculated when initially
-         * loading the editor by setting false.
-         */
-        this.format(wrapper, false);
+        this.format(wrapper);
 
         this.editor.appendChild(wrapper);
     }
@@ -188,25 +183,29 @@ export default class Semantic {
         this.observer.disconnect();
 
         let changed = this.getChanged(changes);
+        let cursor = this.cursor.get();
+
+        // Format block
+        this.setContext(changed, cursor);
         changed.forEach(this.format.bind(this));
 
-        // Update next type
-        if (this.flag === 'Enter') {
+        // Update next block
+        if (this.flag === 'Enter' && changed.length > 1) {
             let type = this.formatters.getType(changed[1].dataset.type);
 
             if (type) {
-                let position = type.enter(changed[1], changed[0]);
-                console.log(changed[0]);
-                this.setRange(changed[0].childNodes[0], position);
+                this.node = changed[0].childNodes[0];
+                this.position = type.enter(changed[1], changed[0]);
             }
         }
 
-        /**
-         * After the update circle is completed, unset all flags needed
-         * to correctly position the caret.
-         */
+        // Set cursor
+        this.cursor.set(cursor.position, this.node);
+
+        // Done
         this.flag = false;
         this.node = null;
+        this.position = null;
 
         this.observer.observe(this.editor, this.options);
     }
@@ -230,119 +229,33 @@ export default class Semantic {
             }
         });
 
-        /**
-         * If the user hit enter inside a paragraph or backspace at the
-         * beginning of a paragraph, there will be two blocks marked as changed.
-         * This stores the correct context node for caret positioning.
-         */
-        if (changed.length > 1) {
-            if (this.flag === 'Enter') {
-                this.node = changed[0];
-            } else if (this.flag === 'Backspace') {
-                this.node = changed[1];
-            }
-        }
-
         return changed;
     }
 
-    /**
-     * Format
-     */
-
-    format(block, caret) {
-        let position;
-
-        if (caret !== false) {
-            position = this.getCaret();
-        }
-
-        this.formatters.parse(block);
-
-        if (block.dataset.type !== 'empty') {
-            this.formatters.format(block);
-        }
-
-        if (position) {
-            this.setCaret(position);
-        }
-    }
-
-    /**
-     * Caret
-     *
-     * The caret position needs to be stored before formatting a block and
-     * to be restored afterwards. Since this always requires user input we
-     * always deal with single point selection where start and end coincide.
-     */
-    getCaret() {
-        let range = window.getSelection().getRangeAt(0);
-        let container = range.startContainer;
-        let offset = range.startOffset;
-
-        range.selectNodeContents(this.editor);
-        range.setEnd(container, offset);
-
+    setContext(changed, cursor) {
         /**
-         * If the user hits the enter key and no context node has been saved yet,
-         * make sure the caret will be positioned inside this node after updating.
-         * This concerns multiple consecutive empty lines.
+         * Store current context node when the user hits enter or backspace.
+         * This will always return two changed nodes unless enter is hit at the
+         * very end of an paragraph.
          */
-        if (this.flag === 'Enter' && !this.node) {
-            this.node = container;
-        }
-
-        return range.toString().length;
-    }
-
-    setCaret(position) {
-        let count = 0;
-        let nodes = [this.editor];
-        let node;
-
-        /**
-         * Set the caret to the given context node if the user hit the enter key.
-         */
-        if (this.flag !== false && this.node) {
-            this.setRange(this.node, 0);
-        } else {
-            /**
-             * Parse all text nodes to find the correct caret position.
-             */
-            while ((node = nodes.pop())) {
-                // Textnode
-                if (node.nodeType === 3) {
-                    let next = count + node.length;
-
-                    if (count <= position && position <= next) {
-                        this.setRange(node, position - count);
-
-                        break;
-                    }
-
-                    count = next;
-                }
-
-                // Collect children
-                else {
-                    let i = node.childNodes.length;
-
-                    while (i--) {
-                        nodes.push(node.childNodes[i]);
-                    }
-                }
+        if (changed.length > 1) {
+            switch (this.flag) {
+                case 'Enter':
+                    this.node = changed[0];
+                    break;
+                case 'Backspace':
+                    this.node = changed[1];
+                    break;
             }
+        } else if (this.flag === 'Enter') {
+            this.node = cursor.node;
         }
+
+        this.position = cursor.position;
     }
 
-    setRange(node, start) {
-        let range = document.createRange();
-        let selection = window.getSelection();
-
-        range.collapse(true);
-        range.setStart(node, start);
-
-        selection.removeAllRanges();
-        selection.addRange(range);
+    format(block) {
+        this.formatters.parse(block);
+        this.formatters.format(block);
     }
 }
