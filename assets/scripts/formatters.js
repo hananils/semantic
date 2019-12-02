@@ -48,6 +48,21 @@ class Formatters {
         this.blockcode = false;
     }
 
+    getType(name) {
+        let block;
+
+        Object.keys(types).some(function(precedence) {
+            return types[precedence].some(function(type) {
+                if (type.name() === name) {
+                    block = type;
+                    return true;
+                }
+            });
+        });
+
+        return block;
+    }
+
     parse(block) {
         let content = block.textContent;
         let current = block.dataset.type;

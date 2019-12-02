@@ -1,4 +1,4 @@
-import Block from '../block.js';
+import Block from './block.js';
 import { registerType } from '../formatters.js';
 
 /**
@@ -9,6 +9,13 @@ import { registerType } from '../formatters.js';
 class UnorderedList extends Block {
     matches(content) {
         return /^\s{0,3}-\s/.test(content);
+    }
+
+    enter(current, created) {
+        created.textContent = '- ' + created.textContent;
+        this.parse(created.textContent, created);
+
+        return 2;
     }
 }
 

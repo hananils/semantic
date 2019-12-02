@@ -1,4 +1,4 @@
-import Block from '../block.js';
+import Block from './block.js';
 import { registerType } from '../formatters.js';
 
 /**

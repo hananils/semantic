@@ -190,6 +190,17 @@ export default class Semantic {
         let changed = this.getChanged(changes);
         changed.forEach(this.format.bind(this));
 
+        // Update next type
+        if (this.flag === 'Enter') {
+            let type = this.formatters.getType(changed[1].dataset.type);
+
+            if (type) {
+                let position = type.enter(changed[1], changed[0]);
+                console.log(changed[0]);
+                this.setRange(changed[0].childNodes[0], position);
+            }
+        }
+
         /**
          * After the update circle is completed, unset all flags needed
          * to correctly position the caret.
