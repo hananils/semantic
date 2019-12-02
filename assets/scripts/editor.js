@@ -143,7 +143,7 @@ export default class Semantic {
 
             this.editor.textContent = begin + pasted + end;
             this.parse();
-            this.set(position + pasted.length + offset);
+            this.cursor.set(position + pasted.length + offset);
         }
 
         event.preventDefault();
