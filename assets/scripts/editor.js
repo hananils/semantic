@@ -111,8 +111,23 @@ export default class Semantic {
         /**
          * These flag have to be unset after the update circle has finished.
          */
-        if (code === 'Enter' || code === 'Backspace') {
-            this.flag = code;
+        switch (code) {
+            case 'Enter':
+                this.flag = code;
+                console.info(
+                    '%c↵ ' + code,
+                    'font-weight: bold; color: #4271ae'
+                );
+                break;
+            case 'Backspace':
+                this.flag = code;
+                console.info(
+                    '%c⌫ ' + code,
+                    'font-weight: bold; color: #c82829'
+                );
+                break;
+            default:
+                console.info('%c' + code, 'font-weight: bold');
         }
     }
 
@@ -228,6 +243,8 @@ export default class Semantic {
             }
         });
 
+        console.info('get changed', changed);
+
         return changed;
     }
 
@@ -251,6 +268,10 @@ export default class Semantic {
         }
 
         this.position = cursor.position;
+        console.info('set context', {
+            position: this.position,
+            node: this.node
+        });
     }
 
     format(block) {
