@@ -77,8 +77,6 @@ export class Cursor {
         let range = document.createRange();
         let selection = window.getSelection();
 
-        console.log(node, range.startOffset, position);
-
         range.collapse(true);
         range.setStart(node, position);
 

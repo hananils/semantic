@@ -165,7 +165,6 @@ export default class Semantic {
         wrapper.textContent = block;
 
         this.format(wrapper);
-
         this.editor.appendChild(wrapper);
     }
 
