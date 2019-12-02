@@ -98,6 +98,10 @@ class Formatters {
     format(block) {
         let content = block.textContent;
 
+        if (!content) {
+            return;
+        }
+
         formats.forEach(function(format) {
             content = format(content, block);
         });
