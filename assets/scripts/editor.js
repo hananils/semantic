@@ -43,69 +43,69 @@ export default class Semantic {
         this.observer.observe(this.editor, this.options);
 
         // Events
-        this.editor.addEventListener('click', this.handleClick.bind(this));
+        // this.editor.addEventListener('click', this.handleClick.bind(this));
         this.editor.addEventListener('keydown', this.handleKeydown.bind(this));
-        this.editor.addEventListener('paste', this.handlePaste.bind(this));
+        // this.editor.addEventListener('paste', this.handlePaste.bind(this));
     }
 
     /**
      * Events
      */
 
-    handleClick({ target, layerX }) {
-        if (target.dataset.type === 'empty' && layerX < 25) {
-            let empty = document.createElement('div');
-            let prevs = this.countEmptyNeighbor(target, 'prev');
-            let nexts = this.countEmptyNeighbor(target, 'next');
+    // handleClick({ target, layerX }) {
+    //     if (target.dataset.type === 'empty' && layerX < 25) {
+    //         let empty = document.createElement('div');
+    //         let prevs = this.countEmptyNeighbor(target, 'prev');
+    //         let nexts = this.countEmptyNeighbor(target, 'next');
 
-            this.format(empty, false);
+    //         this.format(empty, false);
 
-            if (!prevs && nexts < 2) {
-                target.parentNode.insertBefore(empty.cloneNode(true), target);
-            }
-            if (!nexts && prevs < 2) {
-                target.parentNode.insertBefore(
-                    empty.cloneNode(true),
-                    target.nextElementSibling
-                );
-            }
+    //         if (!prevs && nexts < 2) {
+    //             target.parentNode.insertBefore(empty.cloneNode(true), target);
+    //         }
+    //         if (!nexts && prevs < 2) {
+    //             target.parentNode.insertBefore(
+    //                 empty.cloneNode(true),
+    //                 target.nextElementSibling
+    //             );
+    //         }
 
-            if (nexts === 2) {
-                target = target.nextElementSibling;
-            }
-            if (prevs === 2) {
-                target = target.previousElementSibling;
-            }
+    //         if (nexts === 2) {
+    //             target = target.nextElementSibling;
+    //         }
+    //         if (prevs === 2) {
+    //             target = target.previousElementSibling;
+    //         }
 
-            this.cursor.caret(target);
-        }
-    }
+    //         this.cursor.caret(target);
+    //     }
+    // }
 
-    countEmptyNeighbor(node, direction = 'prev') {
-        let siblings = [];
-        let sibling;
+    // countEmptyNeighbor(node, direction = 'prev') {
+    //     let siblings = [];
+    //     let sibling;
 
-        if (direction === 'prev') {
-            sibling = 'previousElementSibling';
-        } else {
-            sibling = 'nextElementSibling';
-        }
+    //     if (direction === 'prev') {
+    //         sibling = 'previousElementSibling';
+    //     } else {
+    //         sibling = 'nextElementSibling';
+    //     }
 
-        let i = 0;
-        while (i < 2 && node[sibling]) {
-            node = node[sibling];
+    //     let i = 0;
+    //     while (i < 2 && node[sibling]) {
+    //         node = node[sibling];
 
-            if (node.dataset.type === 'empty') {
-                siblings.push(node[sibling]);
-            } else {
-                break;
-            }
+    //         if (node.dataset.type === 'empty') {
+    //             siblings.push(node[sibling]);
+    //         } else {
+    //             break;
+    //         }
 
-            i++;
-        }
+    //         i++;
+    //     }
 
-        return siblings.length;
-    }
+    //     return siblings.length;
+    // }
 
     handleKeydown({ code }) {
         /**
@@ -131,38 +131,38 @@ export default class Semantic {
         }
     }
 
-    handlePaste(event) {
-        let pasted = event.clipboardData.getData('text');
-        let selection = window.getSelection();
-        let range = selection.getRangeAt(0);
+    // handlePaste(event) {
+    //     let pasted = event.clipboardData.getData('text');
+    //     let selection = window.getSelection();
+    //     let range = selection.getRangeAt(0);
 
-        selection.deleteFromDocument();
+    //     selection.deleteFromDocument();
 
-        if (pasted) {
-            let length = pasted.length;
-            let block = event.target.closest('div');
-            let { position } = this.cursor.get();
-            let offset = Array.from(block.parentNode.children).indexOf(block);
-            let content = '';
+    //     if (pasted) {
+    //         let length = pasted.length;
+    //         let block = event.target.closest('div');
+    //         let { position } = this.cursor.get();
+    //         let offset = Array.from(block.parentNode.children).indexOf(block);
+    //         let content = '';
 
-            this.editor.childNodes.forEach(function(node) {
-                content += node.textContent + '\n';
-            });
+    //         this.editor.childNodes.forEach(function(node) {
+    //             content += node.textContent + '\n';
+    //         });
 
-            let begin = content.substring(0, position + offset);
-            let end = content.substring(position + offset, content.length);
+    //         let begin = content.substring(0, position + offset);
+    //         let end = content.substring(position + offset, content.length);
 
-            if (/\n/.test(pasted)) {
-                pasted += '\n';
-            }
+    //         if (/\n/.test(pasted)) {
+    //             pasted += '\n';
+    //         }
 
-            this.editor.textContent = begin + pasted + end;
-            this.parse();
-            this.cursor.set(position + pasted.length + offset);
-        }
+    //         this.editor.textContent = begin + pasted + end;
+    //         this.parse();
+    //         this.cursor.set(position + pasted.length + offset);
+    //     }
 
-        event.preventDefault();
-    }
+    //     event.preventDefault();
+    // }
 
     /**
      * Create
