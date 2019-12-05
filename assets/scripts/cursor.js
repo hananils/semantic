@@ -17,7 +17,8 @@ export class Cursor {
     }
 
     get() {
-        let range = window.getSelection().getRangeAt(0);
+        let selection = window.getSelection();
+        let range = selection.getRangeAt(0);
         let container = range.startContainer;
         let offset = range.startOffset;
         let position;
@@ -25,7 +26,9 @@ export class Cursor {
         range.selectNodeContents(this.editable);
         range.setEnd(container, offset);
 
+        console.log('cursor string', range.toString());
         position = range.toString().length;
+        range.setStart(container, offset);
 
         return {
             position: position,

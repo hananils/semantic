@@ -44,7 +44,7 @@ export default class Semantic {
 
         // Events
         this.editor.addEventListener('click', this.handleClick.bind(this));
-        this.editor.addEventListener('keydown', this.handleKeyup.bind(this));
+        this.editor.addEventListener('keydown', this.handleKeydown.bind(this));
         this.editor.addEventListener('paste', this.handlePaste.bind(this));
     }
 
@@ -107,7 +107,7 @@ export default class Semantic {
         return siblings.length;
     }
 
-    handleKeyup({ code }) {
+    handleKeydown({ code }) {
         /**
          * These flag have to be unset after the update circle has finished.
          */
@@ -197,24 +197,38 @@ export default class Semantic {
         this.observer.disconnect();
 
         let changed = this.getChanged(changes);
-        let cursor = this.cursor.get();
+        let cursor;
+
+        if (
+            !this.flag ||
+            changed.length > 1 ||
+            (this.flag === 'Backspace' && changed.length === 1)
+        ) {
+            cursor = this.cursor.get();
+        }
+
+        console.log(this.flag, changed);
 
         // Format block
         this.setContext(changed, cursor);
         changed.forEach(this.format.bind(this));
 
-        // Update next block
-        if (this.flag === 'Enter' && changed.length > 1) {
-            let type = this.formatters.getType(changed[1].dataset.type);
-
-            if (type) {
-                this.node = changed[0].childNodes[0];
-                this.position = type.enter(changed[1], changed[0]);
-            }
+        // console.log(this.flag === 'Backspace', !changed.length, this.previous);
+        // // Set cursor
+        // if (
+        //     this.flag === 'Backspace' &&
+        //     !changed.length &&
+        //     this.previous.dataset.type === 'empty'
+        // ) {
+        //     this.cursor.caret(this.previous);
+        //     this.previous = null;
+        // } else {
+        //     this.cursor.set(cursor.position, this.node);
+        // }
+        //
+        if (this.position) {
+            this.cursor.set(this.position, this.node);
         }
-
-        // Set cursor
-        this.cursor.set(cursor.position, this.node);
 
         // Done
         this.flag = false;
@@ -236,6 +250,8 @@ export default class Semantic {
                 } else {
                     target = target.parentNode;
                 }
+            } else if (target.matches('br')) {
+                target = target.parentNode.closest('div');
             }
 
             if (target && changed.indexOf(target) === -1) {
@@ -254,20 +270,25 @@ export default class Semantic {
          * This will always return two changed nodes unless enter is hit at the
          * very end of an paragraph.
          */
-        if (changed.length > 1) {
-            switch (this.flag) {
-                case 'Enter':
-                    this.node = changed[0];
-                    break;
-                case 'Backspace':
-                    this.node = changed[1];
-                    break;
-            }
-        } else if (this.flag === 'Enter') {
+        if (cursor) {
             this.node = cursor.node;
+        } else if (this.flag === 'Enter') {
+            this.node = changed[0];
         }
 
-        this.position = cursor.position;
+        // Update next block
+        if (this.flag === 'Enter' && changed.length > 1) {
+            let type = this.formatters.getType(changed[1].dataset.type);
+
+            if (type) {
+                this.node = changed[0].childNodes[0];
+                this.position = type.enter(changed[1], changed[0]);
+            }
+        } else if (cursor) {
+            this.position = cursor.position;
+        }
+
+        // this.position = cursor.position;
         console.info('set context', {
             position: this.position,
             node: this.node
