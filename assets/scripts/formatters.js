@@ -9,6 +9,7 @@
 
 let types = {
     first: [],
+    consecutive: [],
     default: [],
     last: [],
     all: [],
@@ -23,7 +24,12 @@ function registerType(Type, precedence = 'default') {
     let type = new Type();
 
     types[precedence].push(type);
-    types['all'] = [...types.first, ...types.default, ...types.last];
+    types['all'] = [
+        ...types.first,
+        ...types.consecutive,
+        ...types.default,
+        ...types.last
+    ];
     types['named'][type.constructor.name.toLowerCase()] = type;
 
     return true;

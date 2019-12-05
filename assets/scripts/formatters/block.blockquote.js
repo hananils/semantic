@@ -19,4 +19,4 @@ class Blockquote extends Block {
     }
 }
 
-registerType(Blockquote);
+registerType(Blockquote, 'consecutive');
