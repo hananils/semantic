@@ -41,7 +41,7 @@ export default class Semantic {
         this.observer.observe(this.editor, this.options);
 
         // Events
-        // this.editor.addEventListener('click', this.handleClick.bind(this));
+        this.editor.addEventListener('click', this.handleClick.bind(this));
         // this.editor.addEventListener('paste', this.handlePaste.bind(this));
     }
 
@@ -49,61 +49,34 @@ export default class Semantic {
      * Events
      */
 
-    // handleClick({ target, layerX }) {
-    //     if (target.dataset.type === 'empty' && layerX < 25) {
-    //         let empty = document.createElement('div');
-    //         let prevs = this.countEmptyNeighbor(target, 'prev');
-    //         let nexts = this.countEmptyNeighbor(target, 'next');
+    handleClick({ target, layerX }) {
+        if (target.dataset.type === 'empty' && layerX < 25) {
+            let empty = document.createElement('div');
+            let prevs = this.getCount(target, 'prev');
+            let nexts = this.getCount(target, 'next');
 
-    //         this.format(empty, false);
+            this.formatters.parse(empty);
 
-    //         if (!prevs && nexts < 2) {
-    //             target.parentNode.insertBefore(empty.cloneNode(true), target);
-    //         }
-    //         if (!nexts && prevs < 2) {
-    //             target.parentNode.insertBefore(
-    //                 empty.cloneNode(true),
-    //                 target.nextElementSibling
-    //             );
-    //         }
+            if (!prevs && nexts < 2) {
+                target.parentNode.insertBefore(empty.cloneNode(true), target);
+            }
+            if (!nexts && prevs < 2) {
+                target.parentNode.insertBefore(
+                    empty.cloneNode(true),
+                    target.nextElementSibling
+                );
+            }
 
-    //         if (nexts === 2) {
-    //             target = target.nextElementSibling;
-    //         }
-    //         if (prevs === 2) {
-    //             target = target.previousElementSibling;
-    //         }
+            if (nexts === 2) {
+                target = target.nextElementSibling;
+            }
+            if (prevs === 2) {
+                target = target.previousElementSibling;
+            }
 
-    //         this.cursor.caret(target);
-    //     }
-    // }
-
-    // countEmptyNeighbor(node, direction = 'prev') {
-    //     let siblings = [];
-    //     let sibling;
-
-    //     if (direction === 'prev') {
-    //         sibling = 'previousElementSibling';
-    //     } else {
-    //         sibling = 'nextElementSibling';
-    //     }
-
-    //     let i = 0;
-    //     while (i < 2 && node[sibling]) {
-    //         node = node[sibling];
-
-    //         if (node.dataset.type === 'empty') {
-    //             siblings.push(node[sibling]);
-    //         } else {
-    //             break;
-    //         }
-
-    //         i++;
-    //     }
-
-    //     return siblings.length;
-    // }
-    //
+            this.cursor.caret(target);
+        }
+    }
 
     // handlePaste(event) {
     //     let pasted = event.clipboardData.getData('text');
@@ -222,6 +195,32 @@ export default class Semantic {
         }, this);
 
         return changed;
+    }
+
+    getCount(node, direction = 'prev', type = 'empty') {
+        let siblings = [];
+        let sibling;
+
+        if (direction === 'prev') {
+            sibling = 'previousElementSibling';
+        } else {
+            sibling = 'nextElementSibling';
+        }
+
+        let i = 0;
+        while (i < 2 && node[sibling]) {
+            node = node[sibling];
+
+            if (node.dataset.type === type) {
+                siblings.push(node[sibling]);
+            } else {
+                break;
+            }
+
+            i++;
+        }
+
+        return siblings.length;
     }
 
     toBlock(node) {
