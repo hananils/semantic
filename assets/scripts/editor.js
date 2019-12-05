@@ -42,7 +42,7 @@ export default class Semantic {
 
         // Events
         this.editor.addEventListener('click', this.handleClick.bind(this));
-        // this.editor.addEventListener('paste', this.handlePaste.bind(this));
+        this.editor.addEventListener('paste', this.handlePaste.bind(this));
     }
 
     /**
@@ -78,38 +78,38 @@ export default class Semantic {
         }
     }
 
-    // handlePaste(event) {
-    //     let pasted = event.clipboardData.getData('text');
-    //     let selection = window.getSelection();
-    //     let range = selection.getRangeAt(0);
+    handlePaste(event) {
+        let pasted = event.clipboardData.getData('text');
+        let selection = window.getSelection();
+        let range = selection.getRangeAt(0);
 
-    //     selection.deleteFromDocument();
+        selection.deleteFromDocument();
 
-    //     if (pasted) {
-    //         let length = pasted.length;
-    //         let block = event.target.closest('div');
-    //         let { position } = this.cursor.get();
-    //         let offset = Array.from(block.parentNode.children).indexOf(block);
-    //         let content = '';
+        if (pasted) {
+            let length = pasted.length;
+            let block = event.target.closest('div');
+            let position = this.cursor.get(this.editor);
+            let offset = Array.from(block.parentNode.children).indexOf(block);
+            let content = '';
 
-    //         this.editor.childNodes.forEach(function(node) {
-    //             content += node.textContent + '\n';
-    //         });
+            this.editor.childNodes.forEach(function(node) {
+                content += node.textContent + '\n';
+            });
 
-    //         let begin = content.substring(0, position + offset);
-    //         let end = content.substring(position + offset, content.length);
+            let begin = content.substring(0, position + offset);
+            let end = content.substring(position + offset, content.length);
 
-    //         if (/\n/.test(pasted)) {
-    //             pasted += '\n';
-    //         }
+            if (/\n/.test(pasted)) {
+                pasted += '\n';
+            }
 
-    //         this.editor.textContent = begin + pasted + end;
-    //         this.parse();
-    //         this.cursor.set(position + pasted.length + offset);
-    //     }
+            this.editor.textContent = begin + pasted + end;
+            this.parse();
+            this.cursor.find(position + pasted.length + offset);
+        }
 
-    //     event.preventDefault();
-    // }
+        event.preventDefault();
+    }
 
     /**
      * Create
@@ -183,6 +183,10 @@ export default class Semantic {
         }
     }
 
+    /**
+     * Utilities
+     */
+
     getChanged(changes) {
         let changed = [];
 
@@ -234,6 +238,4 @@ export default class Semantic {
 
         return node;
     }
-
-    formatBlock(block) {}
 }

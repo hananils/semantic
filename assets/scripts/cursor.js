@@ -12,10 +12,6 @@
  */
 
 export class Cursor {
-    constructor(editable) {
-        this.editable = editable;
-    }
-
     container() {
         let selection = window.getSelection();
         let range = selection.getRangeAt(0);
