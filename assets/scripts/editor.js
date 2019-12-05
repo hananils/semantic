@@ -153,6 +153,10 @@ export default class Semantic {
             this.format(block);
         }, this);
 
+        if (changed.length === 2) {
+            this.formatNew(...changed);
+        }
+
         this.selected = null;
         this.observer.observe(this.editor, this.options);
     }
@@ -183,6 +187,16 @@ export default class Semantic {
         }
     }
 
+    formatNew(created, current) {
+        let type = this.formatters.getType(current.dataset.type);
+
+        if (type) {
+            let position = type.enter(current, created);
+
+            this.cursor.find(position, created);
+        }
+    }
+
     /**
      * Utilities
      */
@@ -193,7 +207,11 @@ export default class Semantic {
         changes.forEach(function({ target }) {
             let node = this.toBlock(target);
 
-            if (node && changed.indexOf(node) === -1) {
+            if (
+                node &&
+                changed.indexOf(node) === -1 &&
+                document.body.contains(node)
+            ) {
                 changed.push(node);
             }
         }, this);

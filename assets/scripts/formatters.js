@@ -86,6 +86,10 @@ class Formatters {
 
         return content;
     }
+
+    getType(name) {
+        return types.named[name];
+    }
 }
 
 export { registerType, registerFormat, Formatters };
