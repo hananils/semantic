@@ -8,12 +8,13 @@ import { registerType } from '../formatters.js';
 
 class Empty extends Block {
     matches(content) {
-        return content.trim() === '';
+        return content === '';
     }
 
     parse(content, block) {
         delete block.dataset;
         block.dataset.type = this.constructor.name.toLowerCase();
+        block.innerHTML = block.textContent;
 
         if (!block.childNodes.length) {
             const br = document.createElement('br');

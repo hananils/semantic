@@ -5,7 +5,7 @@ import { registerFormat } from '../formatters.js';
  * https://hananils.de · buero@hananils.de
  */
 
-registerFormat(function strong(content, block) {
+registerFormat(function strong(content) {
     content = content.replace(/(\*\*[^*]*\*\*)/g, '<strong>$1</strong>');
 
     return content;

@@ -16,39 +16,33 @@ export class Cursor {
         this.editable = editable;
     }
 
-    get() {
+    container() {
+        let selection = window.getSelection();
+        let range = selection.getRangeAt(0);
+        let container = range.startContainer;
+
+        return container;
+    }
+
+    get(node) {
         let selection = window.getSelection();
         let range = selection.getRangeAt(0);
         let container = range.startContainer;
         let offset = range.startOffset;
         let position;
 
-        range.selectNodeContents(this.editable);
+        range.setStart(node, 0);
         range.setEnd(container, offset);
 
-        console.log('cursor string', range.toString());
         position = range.toString().length;
         range.setStart(container, offset);
 
-        return {
-            position: position,
-            node: container
-        };
+        return position;
     }
 
-    set(position = 0, node = null) {
-        if (node) {
-            this.caret(node, 0);
-        } else {
-            this.find(position);
-        }
-
-        return true;
-    }
-
-    find(position) {
+    find(position, context) {
         let count = 0;
-        let nodes = [this.editable];
+        let nodes = [context];
         let node;
 
         while ((node = nodes.pop())) {

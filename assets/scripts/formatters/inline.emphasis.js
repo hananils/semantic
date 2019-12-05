@@ -5,7 +5,7 @@ import { registerFormat } from '../formatters.js';
  * https://hananils.de · buero@hananils.de
  */
 
-registerFormat(function emphasis(content, block) {
+registerFormat(function emphasis(content) {
     content = content.replace(/(_[^_]*_)/g, '<em>$1</em>');
 
     return content;

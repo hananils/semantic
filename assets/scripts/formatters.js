@@ -10,7 +10,9 @@
 let types = {
     first: [],
     default: [],
-    last: []
+    last: [],
+    all: [],
+    named: []
 };
 
 function registerType(Type, precedence = 'default') {
@@ -18,7 +20,11 @@ function registerType(Type, precedence = 'default') {
         return false;
     }
 
-    types[precedence].push(new Type());
+    let type = new Type();
+
+    types[precedence].push(type);
+    types['all'] = [...types.first, ...types.default, ...types.last];
+    types['named'][type.constructor.name.toLowerCase()] = type;
 
     return true;
 }
@@ -44,69 +50,41 @@ function registerFormat(format) {
  */
 
 class Formatters {
-    constructor() {
-        this.blockcode = false;
-    }
-
-    getType(name) {
-        let block;
-
-        Object.keys(types).some(function(precedence) {
-            return types[precedence].some(function(type) {
-                if (type.name() === name) {
-                    block = type;
-                    return true;
-                }
-            });
-        });
-
-        return block;
-    }
-
     parse(block) {
         let content = block.textContent;
         let current = block.dataset.type;
         let blockcode = this.blockcode;
         let parser;
 
-        Object.keys(types).some(function(precedence) {
-            return types[precedence].some(function(type) {
-                const matched = type.matches(content, block);
+        types.all.some(function(type) {
+            if (type.matches(content, block)) {
+                parser = type;
+                return true;
+            }
 
-                if (matched === true && type !== current) {
-                    if (type.constructor.name === 'Blockcode') {
-                        blockcode = !blockcode;
-                    }
-
-                    if (blockcode === true) {
-                        parser = types.default.filter(function(test) {
-                            return test.constructor.name === 'Blockcode';
-                        })[0];
-                    } else {
-                        parser = type;
-                    }
-                }
-
-                return matched;
-            });
+            return false;
         });
 
-        parser.parse(content, block);
-        this.blockcode = blockcode;
+        if (parser) {
+            parser.parse(content, block);
+            console.log(
+                'set type',
+                parser.constructor.name.toLowerCase(),
+                block
+            );
+        }
     }
 
-    format(block) {
-        let content = block.textContent;
-
+    format(content) {
         if (!content) {
             return;
         }
 
         formats.forEach(function(format) {
-            content = format(content, block);
+            content = format(content);
         });
 
-        block.innerHTML = content;
+        return content;
     }
 }
 

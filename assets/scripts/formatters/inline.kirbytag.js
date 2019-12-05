@@ -5,7 +5,7 @@ import { registerFormat } from '../formatters.js';
  * https://hananils.de · buero@hananils.de
  */
 
-registerFormat(function kirbytag(content, block) {
+registerFormat(function kirbytag(content) {
     content = content.replace(/\([a-z0-9_-]+:[^(]*\)/gi, function(match) {
         match = match.replace(/\(?[a-z0-9_-]+:/gi, '<span>$&</span>');
         match = match.replace(/\)/gi, '<span>$&</span>');

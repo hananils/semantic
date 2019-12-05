@@ -26,9 +26,7 @@ export default class Semantic {
         this.editor = editor;
         this.cursor = new Cursor(this.editor);
         this.formatters = new Formatters();
-
-        this.position = null;
-        this.flag = false;
+        this.changed = null;
 
         // Parse document
         this.parse();
@@ -44,7 +42,6 @@ export default class Semantic {
 
         // Events
         // this.editor.addEventListener('click', this.handleClick.bind(this));
-        this.editor.addEventListener('keydown', this.handleKeydown.bind(this));
         // this.editor.addEventListener('paste', this.handlePaste.bind(this));
     }
 
@@ -106,30 +103,7 @@ export default class Semantic {
 
     //     return siblings.length;
     // }
-
-    handleKeydown({ code }) {
-        /**
-         * These flag have to be unset after the update circle has finished.
-         */
-        switch (code) {
-            case 'Enter':
-                this.flag = code;
-                console.info(
-                    '%c↵ ' + code,
-                    'font-weight: bold; color: #4271ae'
-                );
-                break;
-            case 'Backspace':
-                this.flag = code;
-                console.info(
-                    '%c⌫ ' + code,
-                    'font-weight: bold; color: #c82829'
-                );
-                break;
-            default:
-                console.info('%c' + code, 'font-weight: bold');
-        }
-    }
+    //
 
     // handlePaste(event) {
     //     let pasted = event.clipboardData.getData('text');
@@ -179,6 +153,7 @@ export default class Semantic {
         const wrapper = document.createElement('div');
         wrapper.textContent = block;
 
+        this.formatters.parse(wrapper);
         this.format(wrapper);
         this.editor.appendChild(wrapper);
     }
@@ -197,106 +172,69 @@ export default class Semantic {
         this.observer.disconnect();
 
         let changed = this.getChanged(changes);
-        let cursor;
+        this.selected = this.toBlock(this.cursor.container());
 
-        if (
-            !this.flag ||
-            changed.length > 1 ||
-            (this.flag === 'Backspace' && changed.length === 1)
-        ) {
-            cursor = this.cursor.get();
-        }
+        console.log('changed', changed);
+        changed.forEach(function(block) {
+            this.formatters.parse(block);
+            this.format(block);
+        }, this);
 
-        console.log(this.flag, changed);
-
-        // Format block
-        this.setContext(changed, cursor);
-        changed.forEach(this.format.bind(this));
-
-        // console.log(this.flag === 'Backspace', !changed.length, this.previous);
-        // // Set cursor
-        // if (
-        //     this.flag === 'Backspace' &&
-        //     !changed.length &&
-        //     this.previous.dataset.type === 'empty'
-        // ) {
-        //     this.cursor.caret(this.previous);
-        //     this.previous = null;
-        // } else {
-        //     this.cursor.set(cursor.position, this.node);
-        // }
-        //
-        if (this.position) {
-            this.cursor.set(this.position, this.node);
-        }
-
-        // Done
-        this.flag = false;
-        this.node = null;
-        this.position = null;
-
+        this.selected = null;
         this.observer.observe(this.editor, this.options);
+    }
+
+    format(block) {
+        let content = block.textContent;
+
+        if (!content) {
+            return;
+        }
+
+        content = this.formatters.format(block.textContent);
+
+        if (block.innerHTML !== content) {
+            let position;
+
+            if (block === this.selected) {
+                position = this.cursor.get(block);
+            }
+
+            block.innerHTML = content;
+
+            if (position) {
+                this.cursor.find(position, block);
+            }
+
+            console.log('format ' + block.dataset.type, block, position);
+        }
     }
 
     getChanged(changes) {
         let changed = [];
 
         changes.forEach(function({ target }) {
-            if (target.nodeType === 1 && target.matches('.semantic-editor')) {
-                return;
-            } else if (target.nodeType === 3) {
-                if (target.parentNode && !target.parentNode.matches('div')) {
-                    target = target.parentNode.closest('div');
-                } else {
-                    target = target.parentNode;
-                }
-            } else if (target.matches('br')) {
-                target = target.parentNode.closest('div');
-            }
+            let node = this.toBlock(target);
 
-            if (target && changed.indexOf(target) === -1) {
-                changed.push(target);
+            if (node && changed.indexOf(node) === -1) {
+                changed.push(node);
             }
-        });
-
-        console.info('get changed', changed);
+        }, this);
 
         return changed;
     }
 
-    setContext(changed, cursor) {
-        /**
-         * Store current context node when the user hits enter or backspace.
-         * This will always return two changed nodes unless enter is hit at the
-         * very end of an paragraph.
-         */
-        if (cursor) {
-            this.node = cursor.node;
-        } else if (this.flag === 'Enter') {
-            this.node = changed[0];
+    toBlock(node) {
+        if (node.nodeType === 3) {
+            node = node.parentNode;
         }
 
-        // Update next block
-        if (this.flag === 'Enter' && changed.length > 1) {
-            let type = this.formatters.getType(changed[1].dataset.type);
-
-            if (type) {
-                this.node = changed[0].childNodes[0];
-                this.position = type.enter(changed[1], changed[0]);
-            }
-        } else if (cursor) {
-            this.position = cursor.position;
+        if (node && !node.matches('div[data-type]')) {
+            node = node.closest('div[data-type]');
         }
 
-        // this.position = cursor.position;
-        console.info('set context', {
-            position: this.position,
-            node: this.node
-        });
+        return node;
     }
 
-    format(block) {
-        this.formatters.parse(block);
-        this.formatters.format(block);
-    }
+    formatBlock(block) {}
 }

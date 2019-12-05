@@ -12,7 +12,7 @@ class Heading extends Block {
     }
 
     parse(content, block) {
-        let hierarchy = content.match(/^#+/)[0];
+        let hierarchy = content.match(/^\s{0,3}#+/)[0];
 
         this.clear(block);
         block.dataset.type = 'heading';
