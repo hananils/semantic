@@ -15,6 +15,7 @@ class Empty extends Block {
         delete block.dataset;
         block.dataset.type = this.constructor.name.toLowerCase();
         block.innerHTML = block.textContent;
+        block.removeAttribute('placeholder');
 
         if (!block.childNodes.length) {
             const br = document.createElement('br');

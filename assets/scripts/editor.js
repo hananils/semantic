@@ -29,7 +29,11 @@ export default class Semantic {
         this.changed = null;
 
         // Parse document
-        this.parse();
+        if (this.editor.textContent === '') {
+            this.init();
+        } else {
+            this.parse();
+        }
 
         // Watch for changes
         this.options = {
@@ -41,6 +45,8 @@ export default class Semantic {
         this.observer.observe(this.editor, this.options);
 
         // Events
+        this.editor.addEventListener('input', this.handleInput.bind(this));
+        this.editor.addEventListener('keydown', this.handleKeydown.bind(this));
         this.editor.addEventListener('click', this.handleClick.bind(this));
         this.editor.addEventListener('paste', this.handlePaste.bind(this));
     }
@@ -49,29 +55,51 @@ export default class Semantic {
      * Events
      */
 
+    handleInput() {
+        if (this.editor.textContent === '' && this.editor.children.length < 2) {
+            this.init();
+        }
+    }
+
+    handleKeydown() {
+        if (this.editor.textContent === '') {
+            let selection = this.cursor.container();
+
+            // Make sure the correct node is focussed for editing
+            if (selection.matches('.semantic-editor')) {
+                this.cursor.caret(this.editor.children[0]);
+            }
+        }
+    }
+
     handleClick({ target, layerX }) {
         if (target.dataset.type === 'empty' && layerX < 25) {
-            let empty = document.createElement('div');
-            let prevs = this.getCount(target, 'prev');
-            let nexts = this.getCount(target, 'next');
+            if (this.editor.children.length > 1) {
+                let empty = document.createElement('div');
+                let prevs = this.getCount(target, 'prev');
+                let nexts = this.getCount(target, 'next');
 
-            this.formatters.parse(empty);
+                this.formatters.parse(empty);
 
-            if (!prevs && nexts < 2) {
-                target.parentNode.insertBefore(empty.cloneNode(true), target);
-            }
-            if (!nexts && prevs < 2) {
-                target.parentNode.insertBefore(
-                    empty.cloneNode(true),
-                    target.nextElementSibling
-                );
-            }
+                if (!prevs && nexts < 2) {
+                    target.parentNode.insertBefore(
+                        empty.cloneNode(true),
+                        target
+                    );
+                }
+                if (!nexts && prevs < 2) {
+                    target.parentNode.insertBefore(
+                        empty.cloneNode(true),
+                        target.nextElementSibling
+                    );
+                }
 
-            if (nexts === 2) {
-                target = target.nextElementSibling;
-            }
-            if (prevs === 2) {
-                target = target.previousElementSibling;
+                if (nexts === 2) {
+                    target = target.nextElementSibling;
+                }
+                if (prevs === 2) {
+                    target = target.previousElementSibling;
+                }
             }
 
             this.cursor.caret(target);
@@ -118,8 +146,17 @@ export default class Semantic {
     parse() {
         let blocks = this.editor.textContent.split(/\n/);
 
-        this.clear();
+        this.editor.innerHTML = '';
         blocks.forEach(this.write, this);
+    }
+
+    init() {
+        const wrapper = document.createElement('div');
+
+        this.formatters.parse(wrapper);
+        wrapper.setAttribute('placeholder', 'Start typing');
+        this.editor.innerHTML = '';
+        this.editor.appendChild(wrapper);
     }
 
     write(block) {
@@ -129,12 +166,6 @@ export default class Semantic {
         this.formatters.parse(wrapper);
         this.format(wrapper);
         this.editor.appendChild(wrapper);
-    }
-
-    clear() {
-        while (this.editor.firstChild) {
-            this.editor.removeChild(this.editor.firstChild);
-        }
     }
 
     /**
@@ -182,8 +213,6 @@ export default class Semantic {
             if (position) {
                 this.cursor.find(position, block);
             }
-
-            console.log('format ' + block.dataset.type, block, position);
         }
     }
 
