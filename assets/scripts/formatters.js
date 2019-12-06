@@ -13,7 +13,8 @@ let types = {
     default: [],
     last: [],
     all: [],
-    named: []
+    named: {},
+    flagged: {}
 };
 
 function registerType(Type, precedence = 'default') {
@@ -22,15 +23,20 @@ function registerType(Type, precedence = 'default') {
     }
 
     let type = new Type();
+    let name = type.constructor.name.toLowerCase();
 
     types[precedence].push(type);
-    types['all'] = [
+    types.all = [
         ...types.first,
         ...types.consecutive,
         ...types.default,
         ...types.last
     ];
-    types['named'][type.constructor.name.toLowerCase()] = type;
+    types.named[name] = type;
+
+    if (precedence === 'consecutive') {
+        types.flagged[name] = false;
+    }
 
     return true;
 }
@@ -73,11 +79,6 @@ class Formatters {
 
         if (parser) {
             parser.parse(content, block);
-            console.log(
-                'set type',
-                parser.constructor.name.toLowerCase(),
-                block
-            );
         }
     }
 
