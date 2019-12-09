@@ -62,11 +62,15 @@ function registerFormat(format) {
  */
 
 class Formatters {
-    parse(block) {
+    parse(block, all = false) {
         let content = block.textContent;
         let current = block.dataset.type;
-        let blockcode = this.blockcode;
         let parser;
+
+        if (!all && Object.keys(types.flagged).indexOf(current) > -1) {
+            this.parseAll(block);
+            return;
+        }
 
         types.all.some(function(type) {
             if (type.matches(content, block)) {
@@ -95,6 +99,17 @@ class Formatters {
         if (parser) {
             parser.parse(content, block);
         }
+    }
+
+    parseAll(block) {
+        let editor = block.closest('.semantic-editor');
+        let blocks = editor.querySelectorAll('div[data-type]');
+
+        Object.keys(types.flagged).forEach(function(flagged) {
+            types.flagged[flagged] = false;
+        });
+
+        blocks.forEach(this.parse.bind(this));
     }
 
     format(content) {
