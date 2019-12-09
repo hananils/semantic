@@ -6,7 +6,7 @@ import { registerFormat } from '../formatters.js';
  */
 
 registerFormat(function code(content) {
-    content = content.replace(/(`[^`]*`)/g, '<code>$1</code>');
+    content = content.replace(/(`[^`]{1,}`)/g, '<code>$1</code>');
 
     return content;
 });

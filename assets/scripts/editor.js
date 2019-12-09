@@ -94,17 +94,33 @@ export default class Semantic {
 
         if (!document.body.contains(block)) {
             let container = this.cursor.get('container');
-
             let wrapper = document.createElement('div');
+
+            /**
+             * Prevent Safari from wrapping backticks in a <span />
+             */
+            if (!block) {
+                container = container.parentNode;
+
+                // Safari automatically appends a <br />, remove it
+                container.nextElementSibling.remove();
+            }
 
             this.editor.insertBefore(wrapper, container);
             wrapper.appendChild(container);
 
             this.formatters.parse(wrapper);
             this.format(wrapper);
+
+            /**
+             * Reset cursor in Safari, see above
+             */
+            if (!block) {
+                this.cursor.set(wrapper, wrapper.textContent.length - 1);
+            }
         }
 
-        if (block.dataset.type === 'empty') {
+        if (event.code === 'Enter' && block.dataset.type === 'empty') {
             this.cursor.set(
                 this.cursor.get('block'),
                 this.cursor.position('block')
