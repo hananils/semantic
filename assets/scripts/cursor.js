@@ -111,5 +111,7 @@ export class Cursor {
 
         selection.removeAllRanges();
         selection.addRange(range);
+
+        this.locate();
     }
 }
