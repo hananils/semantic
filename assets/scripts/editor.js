@@ -268,7 +268,9 @@ export default class Semantic {
         if (type) {
             let position = type.enter(current, created);
 
-            this.cursor.find(created, position);
+            if (position) {
+                this.cursor.find(created, position);
+            }
         }
     }
 
