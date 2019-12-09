@@ -1,3 +1,5 @@
+import { toBlock } from './utilities.js';
+
 /**
  * hana+nils · Büro für Gestaltung
  * https://hananils.de · buero@hananils.de
@@ -12,31 +14,64 @@
  */
 
 export class Cursor {
-    container() {
-        let selection = window.getSelection();
-        let range = selection.getRangeAt(0);
-        let container = range.startContainer;
+    constructor(editor) {
+        this.editor = editor;
+        this.block = null;
+        this.container = null;
+        this.positions = {
+            editor: null,
+            block: null
+        };
 
-        return container;
+        editor.addEventListener('focus', this.locate.bind(this));
+        editor.addEventListener('input', this.locate.bind(this));
     }
 
-    get(node) {
+    locate() {
+        if (this.editor !== document.activeElement) {
+            this.block = null;
+            this.container = null;
+            this.positions.editor = null;
+            this.positions.block = null;
+        }
+
         let selection = window.getSelection();
         let range = selection.getRangeAt(0);
-        let container = range.startContainer;
-        let offset = range.startOffset;
-        let position;
+        let clone = range.cloneRange();
+        let offset = clone.startOffset;
 
-        range.setStart(node, 0);
-        range.setEnd(container, offset);
+        this.container = clone.startContainer;
+        this.block = toBlock(this.container);
 
-        position = range.toString().length;
-        range.setStart(container, offset);
+        clone.setStart(this.editor, 0);
+        clone.setEnd(this.container, offset);
 
-        return position;
+        this.positions.editor = clone.toString().length;
+
+        if (this.block) {
+            clone.setStart(this.block, 0);
+
+            this.positions.block = clone.toString().length;
+        }
     }
 
-    find(position, context) {
+    get(context) {
+        if (['block', 'container'].indexOf(context) > -1) {
+            return this[context];
+        }
+
+        return this.editor;
+    }
+
+    position(context) {
+        if (context === 'block') {
+            return this.positions.block;
+        }
+
+        return this.positions.editor;
+    }
+
+    find(context, position = 0) {
         let count = 0;
         let nodes = [context];
         let node;
@@ -47,7 +82,7 @@ export class Cursor {
                 let next = count + node.length;
 
                 if (count <= position && position <= next) {
-                    this.caret(node, position - count);
+                    this.set(node, position - count);
 
                     break;
                 }
@@ -66,12 +101,12 @@ export class Cursor {
         }
     }
 
-    caret(node, position = 0) {
-        let range = document.createRange();
+    set(context, position = 0) {
         let selection = window.getSelection();
+        let range = document.createRange();
 
+        range.setStart(context, position);
         range.collapse(true);
-        range.setStart(node, position);
 
         selection.removeAllRanges();
         selection.addRange(range);
