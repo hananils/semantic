@@ -1,5 +1,6 @@
 import { Formatters } from './formatters.js';
 import { Cursor } from './cursor.js';
+import { History } from './history.js';
 import { toBlock } from './utilities.js';
 
 import './formatters/block.blockcode.js';
@@ -27,6 +28,7 @@ export default class Semantic {
         this.editor = editor;
         this.cursor = new Cursor(this.editor);
         this.formatters = new Formatters();
+        this.history = new History(this.editor, this.cursor);
         this.changed = null;
 
         // Parse document
@@ -62,7 +64,27 @@ export default class Semantic {
         }
     }
 
-    handleKeydown() {
+    handleKeydown(event) {
+        if (event.metaKey || event.shiftKey) {
+            let snapshot = null;
+
+            if (event.key === 'z') {
+                snapshot = this.history.backwards();
+            } else if (event.key === 'y') {
+                snapshot = this.history.forwards();
+            }
+
+            // console.log('snapshot', snapshot);
+
+            if (snapshot) {
+                event.preventDefault();
+
+                this.editor.textContent = snapshot.content;
+                this.parse();
+                this.cursor.find(this.editor, snapshot.position);
+            }
+        }
+
         if (this.editor.textContent === '') {
             this.cursor.set(this.editor.children[0], 0);
         }
