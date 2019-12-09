@@ -1,5 +1,6 @@
 import { Formatters } from './formatters.js';
 import { Cursor } from './cursor.js';
+import { toBlock } from './utilities.js';
 
 import './formatters/block.blockcode.js';
 import './formatters/block.blockquote.js';
@@ -63,12 +64,7 @@ export default class Semantic {
 
     handleKeydown() {
         if (this.editor.textContent === '') {
-            let selection = this.cursor.container();
-
-            // Make sure the correct node is focussed for editing
-            if (selection.matches('.semantic-editor')) {
-                this.cursor.caret(this.editor.children[0]);
-            }
+            this.cursor.set(this.editor.children[0], 0);
         }
     }
 
@@ -102,7 +98,7 @@ export default class Semantic {
                 }
             }
 
-            this.cursor.caret(target);
+            this.cursor.set(target);
         }
     }
 
@@ -116,7 +112,7 @@ export default class Semantic {
         if (pasted) {
             let length = pasted.length;
             let block = event.target.closest('div');
-            let position = this.cursor.get(this.editor);
+            let position = this.cursor.position();
             let offset = Array.from(block.parentNode.children).indexOf(block);
             let content = '';
 
@@ -133,7 +129,7 @@ export default class Semantic {
 
             this.editor.textContent = begin + pasted + end;
             this.parse();
-            this.cursor.find(position + pasted.length + offset);
+            this.cursor.find(this.editor, position + pasted.length + offset);
         }
 
         event.preventDefault();
@@ -176,7 +172,7 @@ export default class Semantic {
         this.observer.disconnect();
 
         let changed = this.getChanged(changes);
-        this.selected = this.toBlock(this.cursor.container());
+        this.selected = this.cursor.get('block');
 
         console.log('changed', changed);
         changed.forEach(function(block) {
@@ -205,13 +201,13 @@ export default class Semantic {
             let position;
 
             if (block === this.selected) {
-                position = this.cursor.get(block);
+                position = this.cursor.position('block');
             }
 
             block.innerHTML = content;
 
             if (position) {
-                this.cursor.find(position, block);
+                this.cursor.find(block, position);
             }
         }
     }
@@ -222,7 +218,7 @@ export default class Semantic {
         if (type) {
             let position = type.enter(current, created);
 
-            this.cursor.find(position, created);
+            this.cursor.find(created, position);
         }
     }
 
@@ -234,7 +230,7 @@ export default class Semantic {
         let changed = [];
 
         changes.forEach(function({ target }) {
-            let node = this.toBlock(target);
+            let node = toBlock(target);
 
             if (
                 node &&
@@ -272,17 +268,5 @@ export default class Semantic {
         }
 
         return siblings.length;
-    }
-
-    toBlock(node) {
-        if (node.nodeType === 3) {
-            node = node.parentNode;
-        }
-
-        if (node && !node.matches('div[data-type]')) {
-            node = node.closest('div[data-type]');
-        }
-
-        return node;
     }
 }
