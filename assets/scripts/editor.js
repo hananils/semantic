@@ -75,8 +75,6 @@ export default class Semantic {
                 snapshot = this.history.forwards();
             }
 
-            // console.log('snapshot', snapshot);
-
             if (snapshot) {
                 event.preventDefault();
 
@@ -204,7 +202,6 @@ export default class Semantic {
         let changed = this.getChanged(changes);
         this.selected = this.cursor.get('block');
 
-        // console.log('changed', changed);
         changed.forEach(function(block) {
             this.formatters.parse(block);
             this.format(block);
