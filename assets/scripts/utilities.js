@@ -10,4 +10,14 @@ function toBlock(node) {
     return node.closest('div[data-type]');
 }
 
-export { toBlock };
+function toString(editor) {
+    let content = '';
+
+    editor.childNodes.forEach(function(node) {
+        content += node.textContent + '\n';
+    });
+
+    return content.trim();
+}
+
+export { toBlock, toString };

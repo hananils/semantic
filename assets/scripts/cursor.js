@@ -24,6 +24,7 @@ export class Cursor {
         };
 
         editor.addEventListener('focus', this.locate.bind(this));
+        editor.addEventListener('click', this.locate.bind(this));
         editor.addEventListener('input', this.locate.bind(this));
     }
 

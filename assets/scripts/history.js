@@ -1,3 +1,5 @@
+import { toString } from './utilities.js';
+
 /**
  * hana+nils · Büro für Gestaltung
  * https://hananils.de · buero@hananils.de
@@ -25,11 +27,7 @@ export class History {
 
     set() {
         let position = this.cursor.position();
-        let content = '';
-
-        this.editor.childNodes.forEach(function(node) {
-            content += node.textContent + '\n';
-        });
+        let content = toString(this.editor);
 
         this.append({
             content: content.trim(),

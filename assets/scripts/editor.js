@@ -1,7 +1,7 @@
 import { Formatters } from './formatters.js';
 import { Cursor } from './cursor.js';
 import { History } from './history.js';
-import { toBlock } from './utilities.js';
+import { toBlock, toString } from './utilities.js';
 
 import './formatters/block.blockcode.js';
 import './formatters/block.blockquote.js';
@@ -132,26 +132,17 @@ export default class Semantic {
         selection.deleteFromDocument();
 
         if (pasted) {
-            let length = pasted.length;
-            let block = event.target.closest('div');
-            let position = this.cursor.position();
-            let offset = Array.from(block.parentNode.children).indexOf(block);
-            let content = '';
+            let block = this.cursor.get('block');
+            let position = this.cursor.position('block');
+            let content = block.textContent;
+            let begin = content.substring(0, position);
+            let end = content.substring(position, content.length);
 
-            this.editor.childNodes.forEach(function(node) {
-                content += node.textContent + '\n';
-            });
+            block.textContent = begin + pasted + end;
 
-            let begin = content.substring(0, position + offset);
-            let end = content.substring(position + offset, content.length);
-
-            if (/\n/.test(pasted)) {
-                pasted += '\n';
-            }
-
-            this.editor.textContent = begin + pasted + end;
-            this.parse();
-            this.cursor.find(this.editor, position + pasted.length + offset);
+            this.format(block);
+            this.cursor.find(block, position + pasted.length);
+            this.history.set();
         }
 
         event.preventDefault();
