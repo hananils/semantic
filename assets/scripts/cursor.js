@@ -37,6 +37,11 @@ export class Cursor {
         }
 
         let selection = window.getSelection();
+
+        if (!selection.rangeCount) {
+            return;
+        }
+
         let range = selection.getRangeAt(0);
         let clone = range.cloneRange();
         let offset = clone.startOffset;
