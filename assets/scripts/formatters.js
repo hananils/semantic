@@ -71,11 +71,26 @@ class Formatters {
         types.all.some(function(type) {
             if (type.matches(content, block)) {
                 parser = type;
+
+                let name = parser.name();
+
+                if (Object.keys(types.flagged).indexOf(name) > -1) {
+                    types.flagged[name] = !types.flagged[name];
+                }
+
                 return true;
             }
 
             return false;
         });
+
+        if (types.consecutive.length) {
+            Object.keys(types.flagged).some(function(name) {
+                if (types.flagged[name] === true) {
+                    parser = types.named[name];
+                }
+            });
+        }
 
         if (parser) {
             parser.parse(content, block);

@@ -12,4 +12,4 @@ class Blockcode extends Block {
     }
 }
 
-registerType(Blockcode);
+registerType(Blockcode, 'consecutive');
