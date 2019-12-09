@@ -50,6 +50,7 @@ export default class Semantic {
         // Events
         this.editor.addEventListener('input', this.handleInput.bind(this));
         this.editor.addEventListener('keydown', this.handleKeydown.bind(this));
+        this.editor.addEventListener('keyup', this.handleKeyup.bind(this));
         this.editor.addEventListener('click', this.handleClick.bind(this));
         this.editor.addEventListener('paste', this.handlePaste.bind(this));
     }
@@ -87,6 +88,22 @@ export default class Semantic {
 
         if (this.editor.textContent === '') {
             this.cursor.set(this.editor.children[0], 0);
+        }
+    }
+
+    handleKeyup(event) {
+        let block = this.cursor.get('block');
+
+        if (!document.body.contains(block)) {
+            let container = this.cursor.get('container');
+
+            let wrapper = document.createElement('div');
+
+            this.editor.insertBefore(wrapper, container);
+            wrapper.appendChild(container);
+
+            this.formatters.parse(wrapper);
+            this.format(wrapper);
         }
     }
 
@@ -187,7 +204,7 @@ export default class Semantic {
         let changed = this.getChanged(changes);
         this.selected = this.cursor.get('block');
 
-        console.log('changed', changed);
+        // console.log('changed', changed);
         changed.forEach(function(block) {
             this.formatters.parse(block);
             this.format(block);
