@@ -103,6 +103,13 @@ export default class Semantic {
             this.formatters.parse(wrapper);
             this.format(wrapper);
         }
+
+        if (block.dataset.type === 'empty') {
+            this.cursor.set(
+                this.cursor.get('block'),
+                this.cursor.position('block')
+            );
+        }
     }
 
     handleClick({ target, layerX }) {
