@@ -27,7 +27,7 @@ export default class Semantic {
     constructor(editor) {
         this.editor = editor;
         this.cursor = new Cursor(this.editor);
-        this.formatters = new Formatters();
+        this.formatters = new Formatters(this.editor);
         this.history = new History(this.editor, this.cursor);
         this.changed = null;
 
@@ -194,6 +194,7 @@ export default class Semantic {
         let blocks = this.editor.textContent.split(/\n/);
 
         this.editor.innerHTML = '';
+        this.formatters.unstick();
         blocks.forEach(this.write, this);
     }
 
@@ -226,6 +227,7 @@ export default class Semantic {
         this.selected = this.cursor.get('block');
 
         changed.forEach(function(block) {
+            this.formatters.unstick();
             this.formatters.parse(block);
             this.format(block);
         }, this);

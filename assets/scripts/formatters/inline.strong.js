@@ -1,11 +1,11 @@
-import { registerFormat } from '../formatters.js';
+import { registerFormat } from '../register.js';
 
 /**
  * hana+nils · Büro für Gestaltung
  * https://hananils.de · buero@hananils.de
  */
 
-registerFormat(function strong(content) {
+registerFormat('strong', function(content) {
     content = content.replace(/(\*\*[^*]*\*\*)/g, '<strong>$1</strong>');
 
     return content;

@@ -1,115 +1,80 @@
+import { getFormats, getSticky, getTypes } from './register.js';
+
 /**
  * hana+nils · Büro für Gestaltung
  * https://hananils.de · buero@hananils.de
  */
 
 /**
- * Types
- */
-
-let types = {
-    first: [],
-    consecutive: [],
-    default: [],
-    last: [],
-    all: [],
-    named: {},
-    flagged: {}
-};
-
-function registerType(Type, precedence = 'default') {
-    if (!Type) {
-        return false;
-    }
-
-    let type = new Type();
-    let name = type.constructor.name.toLowerCase();
-
-    types[precedence].push(type);
-    types.all = [
-        ...types.first,
-        ...types.consecutive,
-        ...types.default,
-        ...types.last
-    ];
-    types.named[name] = type;
-
-    if (precedence === 'consecutive') {
-        types.flagged[name] = false;
-    }
-
-    return true;
-}
-
-/**
- * Formats
- */
-
-let formats = [];
-
-function registerFormat(format) {
-    if (!format) {
-        return false;
-    }
-
-    formats.push(format);
-
-    return true;
-}
-
-/**
  * Formatters
  */
 
 class Formatters {
-    parse(block, all = false) {
-        let content = block.textContent;
+    constructor(editor) {
+        this.editor = editor;
+        this.types = getTypes();
+        this.formats = getFormats();
+        this.sticky = getSticky();
+    }
+
+    unstick() {
+        Object.keys(this.sticky).forEach(function(name) {
+            this.sticky[name] = false;
+        }, this);
+    }
+
+    parse(block) {
         let current = block.dataset.type;
-        let parser;
 
-        if (!all && Object.keys(types.flagged).indexOf(current) > -1) {
-            this.parseAll(block);
-            return;
-        }
+        if (current && Object.keys(this.sticky).indexOf(current) > -1) {
+            this.typecaseAll();
+        } else {
+            let type = this.typecast(block);
 
-        types.all.some(function(type) {
-            if (type.matches(content, block)) {
-                parser = type;
-
-                let name = parser.name();
-
-                if (Object.keys(types.flagged).indexOf(name) > -1) {
-                    types.flagged[name] = !types.flagged[name];
-                }
-
-                return true;
+            if (Object.keys(this.sticky).indexOf(type) > -1) {
+                this.typecaseAll();
             }
-
-            return false;
-        });
-
-        if (types.consecutive.length) {
-            Object.keys(types.flagged).some(function(name) {
-                if (types.flagged[name] === true) {
-                    parser = types.named[name];
-                }
-            });
         }
+    }
+
+    typecaseAll() {
+        this.unstick();
+        this.editor.childNodes.forEach(this.typecast, this);
+        this.unstick();
+    }
+
+    typecast(block) {
+        let content = block.textContent;
+        let types = this.types.entries();
+        let parser = null;
+        let name = null;
+        let type;
+
+        while (!parser && (type = types.next().value)) {
+            if (type[1].matches(content, block)) {
+                name = type[0];
+                parser = type[1];
+
+                // Flag sticky type
+                if (Object.keys(this.sticky).indexOf(name) > -1) {
+                    this.sticky[name] = !this.sticky[name];
+                }
+            }
+        }
+
+        Object.keys(this.sticky).some(
+            function(name) {
+                if (this.sticky[name] === true) {
+                    parser = this.types.get(name);
+                }
+            }.bind(this)
+        );
 
         if (parser) {
             parser.parse(content, block);
         }
-    }
 
-    parseAll(block) {
-        let editor = block.closest('.semantic-editor');
-        let blocks = editor.querySelectorAll('div[data-type]');
-
-        Object.keys(types.flagged).forEach(function(flagged) {
-            types.flagged[flagged] = false;
-        });
-
-        blocks.forEach(this.parse.bind(this));
+        return name;
     }
 
     format(content) {
@@ -117,7 +82,7 @@ class Formatters {
             return;
         }
 
-        formats.forEach(function(format) {
+        this.formats.forEach(function(format) {
             content = format(content);
         });
 
@@ -125,8 +90,8 @@ class Formatters {
     }
 
     getType(name) {
-        return types.named[name];
+        return this.types.get(name);
     }
 }
 
-export { registerType, registerFormat, Formatters };
+export { Formatters };

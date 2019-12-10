@@ -1,5 +1,5 @@
 import Block from './block.js';
-import { registerType } from '../formatters.js';
+import { registerType } from '../register.js';
 
 /**
  * hana+nils · Büro für Gestaltung

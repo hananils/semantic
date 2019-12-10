@@ -1,5 +1,5 @@
 import Block from './block.js';
-import { registerType } from '../formatters.js';
+import { registerType } from '../register.js';
 
 /**
  * hana+nils · Büro für Gestaltung
@@ -12,4 +12,4 @@ class Blockcode extends Block {
     }
 }
 
-registerType(Blockcode, 'consecutive');
+registerType(Blockcode, 'sticky');
