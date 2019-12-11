@@ -15,24 +15,12 @@ class Formatters {
         this.types = getTypes();
         this.formats = getFormats();
         this.sticky = getSticky();
-        this.flags = '';
+        this.sticking = '';
     }
 
-    isSticky(type) {
-        return Object.keys(this.sticky).indexOf(type) > -1;
-    }
-
-    stick(type) {
-        if (this.flags === type) {
-            this.unstick();
-        } else {
-            this.flags = type;
-        }
-    }
-
-    unstick() {
-        this.flags = '';
-    }
+    /**
+     * Types
+     */
 
     parse(block) {
         let current = block.dataset.type;
@@ -72,8 +60,8 @@ class Formatters {
             }
         }
 
-        if (this.flags) {
-            parser = this.types.get(this.flags);
+        if (this.sticking) {
+            parser = this.types.get(this.sticking);
         }
 
         if (parser) {
@@ -82,6 +70,34 @@ class Formatters {
 
         return name;
     }
+
+    getType(name) {
+        return this.types.get(name);
+    }
+
+    /**
+     * Stickies
+     */
+
+    isSticky(type) {
+        return Object.keys(this.sticky).indexOf(type) > -1;
+    }
+
+    stick(type) {
+        if (this.sticking === type) {
+            this.unstick();
+        } else {
+            this.sticking = type;
+        }
+    }
+
+    unstick() {
+        this.sticking = '';
+    }
+
+    /**
+     * Formats
+     */
 
     format(content) {
         if (!content) {
@@ -93,10 +109,6 @@ class Formatters {
         });
 
         return content;
-    }
-
-    getType(name) {
-        return this.types.get(name);
     }
 }
 
