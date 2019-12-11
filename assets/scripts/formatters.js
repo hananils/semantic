@@ -15,23 +15,34 @@ class Formatters {
         this.types = getTypes();
         this.formats = getFormats();
         this.sticky = getSticky();
+        this.flags = '';
+    }
+
+    isSticky(type) {
+        return Object.keys(this.sticky).indexOf(type) > -1;
+    }
+
+    stick(type) {
+        if (this.flags === type) {
+            this.unstick();
+        } else {
+            this.flags = type;
+        }
     }
 
     unstick() {
-        Object.keys(this.sticky).forEach(function(name) {
-            this.sticky[name] = false;
-        }, this);
+        this.flags = '';
     }
 
     parse(block) {
         let current = block.dataset.type;
 
-        if (current && Object.keys(this.sticky).indexOf(current) > -1) {
+        if (current && this.isSticky(current)) {
             this.typecaseAll();
         } else {
             let type = this.typecast(block);
 
-            if (Object.keys(this.sticky).indexOf(type) > -1) {
+            if (this.isSticky(type)) {
                 this.typecaseAll();
             }
         }
@@ -47,28 +58,23 @@ class Formatters {
         let content = block.textContent;
         let types = this.types.entries();
         let parser = null;
-        let name = null;
-        let type;
+        let name, value, type;
 
-        while (!parser && (type = types.next().value)) {
-            if (type[1].matches(content, block)) {
-                name = type[0];
-                parser = type[1];
+        while (!parser && (value = types.next().value)) {
+            [name, type] = value;
+            if (type.matches(content, block)) {
+                parser = type;
 
                 // Flag sticky type
-                if (Object.keys(this.sticky).indexOf(name) > -1) {
-                    this.sticky[name] = !this.sticky[name];
+                if (this.isSticky(name)) {
+                    this.stick(name);
                 }
             }
         }
 
-        Object.keys(this.sticky).some(
-            function(name) {
-                if (this.sticky[name] === true) {
-                    parser = this.types.get(name);
-                }
-            }.bind(this)
-        );
+        if (this.flags) {
+            parser = this.types.get(this.flags);
+        }
 
         if (parser) {
             parser.parse(content, block);
