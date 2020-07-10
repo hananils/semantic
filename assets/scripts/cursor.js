@@ -18,6 +18,7 @@ export class Cursor {
         this.editor = editor;
         this.block = null;
         this.container = null;
+        this.index = null;
         this.positions = {
             editor: null,
             block: null
@@ -32,6 +33,7 @@ export class Cursor {
         if (this.editor !== document.activeElement) {
             this.block = null;
             this.container = null;
+            this.index = null;
             this.positions.editor = null;
             this.positions.block = null;
         }
@@ -58,6 +60,7 @@ export class Cursor {
             clone.setStart(this.block, 0);
 
             this.positions.block = clone.toString().length;
+            this.index = Array.from(this.editor.children).indexOf(this.block);
         }
     }
 
@@ -75,6 +78,10 @@ export class Cursor {
         }
 
         return this.positions.editor;
+    }
+
+    blockindex() {
+        return this.index;
     }
 
     find(context, position = 0) {
@@ -110,6 +117,10 @@ export class Cursor {
     set(context, position = 0) {
         let selection = window.getSelection();
         let range = document.createRange();
+
+        if (!context) {
+            context = this.editor;
+        }
 
         range.setStart(context, position);
         range.collapse(true);

@@ -10,28 +10,41 @@ export class History {
         this.editor = editor;
         this.cursor = cursor;
         this.max = max;
+        this.history = {};
+
+        this.editor.addEventListener('click', this.init.bind(this));
+        this.editor.addEventListener('keydown', this.init.bind(this));
+        this.editor.addEventListener('focus', this.init.bind(this));
+        this.editor.addEventListener('input', this.set.bind(this));
+    }
+
+    init() {
+        if (this.history.current) {
+            return;
+        }
 
         this.history = {
             backwards: [],
             current: [
                 {
-                    content: this.editor.textContent,
-                    position: this.cursor.position()
+                    content: toString(this.editor),
+                    position: this.cursor.position('block'),
+                    index: this.cursor.blockindex()
                 }
             ],
             forwards: []
         };
-
-        this.editor.addEventListener('input', this.set.bind(this));
     }
 
     set() {
-        let position = this.cursor.position();
+        let position = this.cursor.position('block');
+        let index = this.cursor.blockindex();
         let content = toString(this.editor);
 
         this.append({
-            content: content.trim(),
-            position: position
+            content: content,
+            position: position,
+            index: index
         });
     }
 

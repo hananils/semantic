@@ -48,7 +48,6 @@ export default class Semantic {
         this.observer.observe(this.editor, this.options);
 
         // Events
-        this.editor.addEventListener('input', this.handleInput.bind(this));
         this.editor.addEventListener('keydown', this.handleKeydown.bind(this));
         this.editor.addEventListener('keyup', this.handleKeyup.bind(this));
         this.editor.addEventListener('click', this.handleClick.bind(this));
@@ -58,12 +57,6 @@ export default class Semantic {
     /**
      * Events
      */
-
-    handleInput() {
-        if (this.editor.textContent === '' && this.editor.children.length < 2) {
-            this.init();
-        }
-    }
 
     handleKeydown(event) {
         if (event.metaKey || event.shiftKey) {
@@ -80,7 +73,16 @@ export default class Semantic {
 
                 this.editor.textContent = snapshot.content;
                 this.parse();
-                this.cursor.find(this.editor, snapshot.position);
+
+                let block = this.editor.querySelector(
+                    'div[data-type]:nth-child(' + (snapshot.index + 1) + ')'
+                );
+
+                if (block.dataset.type === 'empty') {
+                    this.cursor.set(block, snapshot.position);
+                } else {
+                    this.cursor.find(block, snapshot.position);
+                }
             }
         }
 
@@ -90,37 +92,31 @@ export default class Semantic {
     }
 
     handleKeyup(event) {
+        let children = this.editor.querySelectorAll('div[data-type]');
         let block = this.cursor.get('block');
 
-        if (!document.body.contains(block)) {
-            let container = this.cursor.get('container');
-            let wrapper = document.createElement('div');
+        if (children.length !== this.editor.childNodes.length) {
+            let position = this.cursor.position('block');
+            let index = this.cursor.blockindex();
 
-            /**
-             * Prevent Safari from wrapping backticks in a <span />
-             */
-            if (!block) {
-                container = container.parentNode;
+            this.editor.innerHTML = toString(this.editor);
+            this.parse();
 
-                // Safari automatically appends a <br />, remove it
-                container.nextElementSibling.remove();
+            block = this.editor.querySelector(
+                'div[data-type]:nth-child(' + (index + 1) + ')'
+            );
+
+            // Make sure to include typed visible characters
+            if (event.key.length === 1) {
+                position++;
             }
 
-            this.editor.insertBefore(wrapper, container);
-            wrapper.appendChild(container);
-
-            this.formatters.parse(wrapper);
-            this.format(wrapper);
-
-            /**
-             * Reset cursor in Safari, see above
-             */
-            if (!block) {
-                this.cursor.set(wrapper, wrapper.textContent.length - 1);
-            }
-        }
-
-        if (event.code === 'Enter' && block.dataset.type === 'empty') {
+            this.cursor.set(block, position);
+        } else if (
+            event.code === 'Enter' &&
+            block &&
+            block.dataset.type === 'empty'
+        ) {
             this.cursor.set(
                 this.cursor.get('block'),
                 this.cursor.position('block')
